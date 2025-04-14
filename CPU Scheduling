@@ -1,0 +1,237 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct Process
+{
+    int pid,at,bt,ct,rt,ta,wt,pri,rem;
+}p[10];
+
+int n,i,j,t,totbt,q[50],f=-1,r=-1;
+float rt_avg,ct_avg,ta_avg,wt_avg;
+
+void enq(int x)
+{
+    q[++r]=x;
+    if(r=0)
+    {
+        f++;
+    }
+}
+int deq()
+{
+    int x=q[f++];
+    return x;
+}
+void op()
+{
+    p[0].rt=p[0].wt=0;
+    p[0].ct=p[0].ta=p[0].bt;
+    
+    for(i=1;i<n;i++)
+    {
+        p[q[i]].ct=p[q[i]].bt-p[q[i-1]].ct;
+        p[q[i]].rt=p[q[i-1]].ct-p[q[i]].at;
+        p[q[i]].ta=p[q[i]].ct-p[q[i]].at;
+        p[q[i]].wt=p[q[i]].rt;
+    }
+    for(i=0;i<n;i++)
+    {
+        printf("\n\n\t");
+        for(j=0;j<=i;j++)
+        {
+            printf("P%d\t",q[j]);
+        }
+        printf("\n\t0\t");
+        for(j=0;j<=i;j++)
+        {
+            printf("%d\t",p[q[j]].ct);
+        }
+    }
+}
+
+void fcfs()
+{
+    for(i=0;i<n;i++)
+    {
+        enq(i);
+    }
+    op();
+}
+
+void sjf()
+{
+    int pi=0,bt,c,temp;
+    for(t=0;t<totbt;)
+    {
+        c=0;bt=0;
+        for(i=pi;i<n;i++)
+        {
+            if(p[i].at<=t)
+            {
+                c++;
+                bt+=p[i].bt;
+                enq(i);
+            }
+        }
+        if(c>1)
+        {
+            for(i=pi;i<pi+c;i++)
+            {
+                for(j=pi;j<pi+c-i;j++)
+                {
+                    if(p[q[j]].bt>p[q[j+1]].bt)
+                    {
+                        temp=q[j];
+                        q[j]=q[j+1];
+                        q[j+1]=temp;
+                    }
+                }
+            }
+        }
+        pi+=c;
+        t+=bt;
+    }
+    op();
+}
+
+void ps()
+{
+    int pi=0,bt,c,temp;
+    for(t=0;t<totbt;)
+    {
+        c=0;bt=0;
+        for(i=pi;i<n;i++)
+        {
+            if(p[i].at<=t)
+            {
+                c++;
+                bt+=p[i].bt;
+                enq(i);
+            }
+        }
+        if(c>1)
+        {
+            for(i=pi;i<pi+c;i++)
+            {
+                for(j=pi;j<pi+c-i;j++)
+                {
+                    if(p[q[j]].pri>p[q[j+1]].pri)
+                    {
+                        temp=q[j];
+                        q[j]=q[j+1];
+                        q[j+1]=temp;
+                    }
+                }
+            }
+        }
+        pi+=c;
+        t+=bt;
+    }
+    op();
+}
+
+void rrobin()
+{
+    int in,nxt=-1;
+    for(t=0;t<totbt;t++)
+    {
+        for(j=in;j<n;j++)
+        {
+            if(p[j].at<=t)
+            {
+                in++;
+                enq(j);
+            }
+        }
+        if(nxt!=-1)
+        {
+            if(p[nxt].rem==0)
+            {
+                p[nxt].ct=t;
+            }
+            else
+            {
+                enq(nxt);
+            }
+        }
+        nxt=deq();
+        if(p[nxt].bt=p[nxt].rem)
+        {
+            p[nxt].rt=t-p[nxt].at;
+        }
+        p[nxt].rem--;
+    }
+    for(i=0;i<totbt;i++)
+    {
+        for(j=0;j<i+2;j++)
+        {
+            printf("%d\t",j);
+        }
+        printf("\n");
+        for(j=0;j<=i;j++)
+        {
+            printf("P%d\t",q[j]);
+        }
+        printf("\n");
+    }
+    for(i=0;i<n;i++)
+    {
+        p[i].ta=p[i].ct-p[i].at;
+        p[i].wt=p[i].ta-p[i].bt;
+    }
+    
+}
+
+void main()
+{
+    int choice, pi;
+    printf("Enter no of processes: ");
+    scanf("%d", &n);
+    for(i=0; i < n; i++)
+    {
+        printf("Process %d\nAT: ", i);
+        scanf("%d", &p[1].at);
+        printf("BT: ");
+        printf("Priority: ");
+        scanf("%d", &p[i].pri);
+
+        p[i].pid=i;
+        p[i].rem =p[i].bt;
+        totbt+= p[i].bt;
+    }
+
+    printf("\n MENU\n1. fcfs\t2. sjf\t3. priority\t4. round robin\t\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+
+    switch(choice)
+    {
+        case 1: fcfs();
+                break;
+        case 2: sjf();
+                break;
+        case 3: ps();
+                break;
+        case 4: rrobin();
+                break;
+        default: printf("Invalid choice");
+                 exit(0);
+    }
+
+    ct_avg=ta_avg=wt_avg=rt_avg = 0;
+    printf("\n\n\n\tPID\tAT\tBT\tPrio\tRT\tCT\tTA\tWT"); 
+    for(i=0; i < n; i++)
+    {
+        printf("\n\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",p[i].pid,p[i].at,p[i].bt,p[i].pri, p[i].rt,p[i].ct,p[i].ta,p[i].wt);
+        rt_avg += p[i].rt;
+        ct_avg += p[i].ct;
+        ta_avg+= p[i].ta;
+        wt_avg += p[i].wt;
+    }
+    printf("\n\tTotal\t\t\t\t%.2f\t%.2f\t%.2f\t%.2f", rt_avg, ct_avg, ta_avg, wt_avg);
+    rt_avg/=n;
+    ct_avg/=n;
+    ta_avg/=n;
+    wt_avg/=n;
+    printf("\n\tAvg\t\t\t\t%.2f\t%.2f\t%.2f\t%.2f\n\n", rt_avg, ct_avg, ta_avg, wt_avg);
+}
