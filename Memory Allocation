@@ -1,0 +1,85 @@
+#include <stdio.h>
+
+int b, p, block[10], prc[10], mark[10];
+
+void firstFit() {
+    for (int i = 0; i < p; i++) {
+        mark[i] = -1;
+        for (int j = 0; j < b; j++) {
+            if (block[j] >= prc[i]) {
+                mark[i] = j;
+                block[j] -= prc[i];
+                break;
+            }
+        }
+    }
+}
+
+void bestFit() {
+    for (int i = 0; i < p; i++) {
+        mark[i] = -1;
+        int bestIdx = -1;
+        for (int j = 0; j < b; j++) {
+            if (block[j] >= prc[i] && (bestIdx == -1 || block[j] < block[bestIdx])) {
+                bestIdx = j;
+            }
+        }
+        if (bestIdx != -1) {
+            mark[i] = bestIdx;
+            block[bestIdx] -= prc[i];
+        }
+    }
+}
+
+void worstFit() {
+    for (int i = 0; i < p; i++) {
+        mark[i] = -1;
+        int worstIdx = -1;
+        for (int j = 0; j < b; j++) {
+            if (block[j] >= prc[i] && (worstIdx == -1 || block[j] > block[worstIdx])) {
+                worstIdx = j;
+            }
+        }
+        if (worstIdx != -1) {
+            mark[i] = worstIdx;
+            block[worstIdx] -= prc[i];
+        }
+    }
+}
+
+void displayResults() {
+    printf("\nProcess No.\tSize\tBlock No.\n");
+    for (int i = 0; i < p; i++) {
+        printf("%d\t\t%d\t", i + 1, prc[i]);
+        if (mark[i] != -1)
+            printf("%d\n", mark[i] + 1);
+        else
+            printf("Not Allocated\n");
+    }
+}
+
+int main() {
+    printf("Enter number of blocks: ");
+    scanf("%d", &b);
+    printf("Enter block sizes: ");
+    for (int i = 0; i < b; i++) scanf("%d", &block[i]);
+
+    printf("Enter number of processes: ");
+    scanf("%d", &p);
+    printf("Enter process sizes: ");
+    for (int i = 0; i < p; i++) scanf("%d", &prc[i]);
+
+    printf("\n--- First Fit ---\n");
+    firstFit();
+    displayResults();
+    
+    printf("\n--- Best Fit ---\n");
+    bestFit();
+    displayResults();
+    
+    printf("\n--- Worst Fit ---\n");
+    worstFit();
+    displayResults();
+
+    return 0;
+}
