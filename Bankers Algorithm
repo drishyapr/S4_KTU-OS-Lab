@@ -1,0 +1,132 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int n,m,max[10][20],allocation[10][20],need[10][20],available[20],req[20];
+int safe[10],finish[10];
+
+void resourceReqAlgo(int r)
+{
+    for(int i=0;i<m;i++)
+    {
+        if((req[i]>need[r][i]) && (req[i]>available[i]))
+        {
+            printf("\nError\n\n");
+            exit(0);
+        }
+    }
+    for(int i=0;i<m;i++)
+    {
+        available[i]-=req[i];
+        allocation[r][i]+=req[i];
+        need[r][i]-=req[i];
+    }
+}
+
+void safetyAlgo()
+{
+    int i,j,k=0,work[20];
+    for(i=0;i<m;i++)
+    {
+        work[i]=available[i];
+    }
+    for(i=0;i<n;i++)
+    {
+        finish[i]=0;
+    }
+    for(i=0;i<n;i++)
+    {
+        for(j=k;(j+1)%n!=k;j=(j+1)%n)
+        {
+            if(!finish[i])
+            {
+                int a;
+                for(a=0;a<m;a++)
+                {
+                    if(need[j][a]>work[a])
+                    {   
+                        break;
+                    }
+                }
+                if(a<m)
+                {
+                    continue;
+                }
+                k=j;
+                safe[i]=j;
+                finish[j]=1;
+                for(a=0;a,m;a++)
+                {
+                    work[a]+=allocation[j][a];
+                }
+                break;
+            }
+        }
+    }
+}
+
+void main()
+{
+    int r;
+    printf("No.of processes:");
+    scanf("%d",&n);
+    printf("Np.of resources:");
+    scanf("%d",&m);
+    printf("\nMax no.of resources needed:\n");
+    for(int i=0;i<n;i++)
+    {
+        printf("P%d",i);
+        for(int j=0;j<m;j++)
+        {
+            scanf("%d",max[i][j]);
+        }
+    }
+    printf("\nResource allocated:\n");
+    for(int i=0;i<n;i++)
+    {
+        printf("P%d",i);
+        for(int j=0;j<m;j++)
+        {
+            scanf("%d",allocation[i][j]);
+            need[i][j]=max[i][j]-allocation[i][j];
+        }
+    }
+    printf("\nResource available:\n");
+    for(int i=0;i<m;i++)
+    {
+        scanf("%d",available[i]);
+    }
+    printf("Has any process requested? [1/0]:");
+    scanf("%d",&r);
+    if(r)
+    {
+        printf("Requesting process no:");
+        scanf("%d",&r);
+        printf("Request:");
+        for(int i=0;i<m;i++)
+        {
+            scanf("%d",req[i]);
+        }
+        resourceReqAlgo(r);
+    }
+    safetyAlgo();
+    for(r=0;r<n;r++)
+    {zz
+        if(!finish[r])
+        {
+            break;
+        }
+    }
+    if(r<n)
+    {
+        printf("Not safe");
+    }
+    else
+    {
+        printf("Safe sequence:");
+        for(int i=0;i<n-1;i++)
+        {
+            printf("%d - >",safe[i]);
+        }
+        printf("%d",safe[n-1]);
+    }
+}
