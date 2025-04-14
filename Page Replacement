@@ -1,0 +1,246 @@
+#include<stdio.h>
+
+int frame [10], req [30], ru[10], fn, rn, fault=0, q[100], f = -1, r = -1;
+
+void display()
+{
+   for(int i = 0; i < fn; i++)
+   {
+      if(frame[i]!= -1)
+      {
+         printf("%d", frame[1]);
+      }
+   }
+}
+
+void enq(int x)
+{
+   q[++r] = x;
+   if(f== -1)
+   {
+      f = 0;
+   }
+}
+
+int deq()
+{
+   int x = q[f++];
+   if(f>r)
+   {
+      f=r=-1;
+   }
+   return x;
+}
+
+void fifo()
+{
+   int j, x;
+   for(int i=0; i<rn; i++)
+   {
+      printf("\n%d", req[i]);
+      for(j=0; j < fn; j++)
+      {
+        if(frame[j] == req[i]) 
+        {
+           break;
+        }
+      }
+      if(j!= fn)
+      { 
+        continue;
+      }
+      fault++;
+      for(j=0; j < fn; j++)
+      {
+        if(frame[j] == -1) 
+        {
+           break;
+        }
+      }
+      if(j != fn)
+      {
+        enq(req[i]);
+        frame[j] = req[1];
+        display();
+        continue;
+      }
+      int x = deq();
+      for(j=0; j < fn; j++)
+      {
+         if(frame[j] == x)
+         {
+            break;
+         }
+      }
+      frame[j] = req[i];
+      enq(req[i]);
+      display();
+   }
+}
+
+void lru()
+{
+   int j,k=fn;
+   for(int i=0; 1 < rn; i++)
+   {
+      int x, lru = -1;
+      printf("\n%d ", req[i]);
+      for(j=0; j < fn; j++)
+      {
+        if(frame[j] == req[i])
+        {
+            break;
+        }
+      }
+      if(j == fn)
+      {
+         fault++;
+         for(k = 0; k < fn; k++)
+         {
+            if(frame[k] == -1)
+            {
+               break;
+            }
+         }
+         if(k == fn) 
+         {
+            lru = q[f];
+            for(int a = f+1; a < f+fn; a++)
+            {
+               if(ru[lru] < ru[q[a]])
+               {
+                  lru = q[a];
+               }
+            }
+            for(int a = 0; a < fn; a++)
+            {
+               if(lru == frame[a])
+               {
+                  frame[a] = req[i];
+                  break;
+               }
+            }
+         }
+         else
+         {
+             frame[k] = req[i];
+         }
+         display();
+     }
+     for(j=0; j < k; j++)
+     {
+       x = deq();
+       if(x != req[i] && x != lru)
+       {
+          enq(x);
+       }
+     }
+     enq(req[i]);
+     for(j = 0; j < fn; j++)
+     {
+      ru[frame[j]]++;
+     }
+     ru[req[i]] = 1;
+   }
+   printf("\n\nfaults = %d\thits = %d\n\n", fault, rn-fault);
+}
+
+void lfu()
+{
+   int j,k=fn;
+   for(int i=0; 1 < rn; i++)
+   {
+      int x, lfu = -1;
+      printf("\n%d ", req[i]);
+      for(j=0; j < fn; j++)
+      {
+        if(frame[j] == req[i])
+        {
+            break;
+        }
+      }
+      if(j == fn)
+      {
+         fault++;
+         for(k = 0; k < fn; k++)
+         {
+            if(frame[k] == -1)
+            {
+               break;
+            }
+         }
+         if(k == fn) 
+         {
+            lfu = q[f];
+            for(int a = f+1; a < f+fn; a++)
+            {
+               if(ru[lfu] < ru[q[a]])
+               {
+                  lfu = q[a];
+               }
+            }
+            for(int a = 0; a < fn; a++)
+            {
+               if(lfu == frame[a])
+               {
+                  frame[a] = req[i];
+                  break;
+               }
+            }
+         }
+         else
+         {
+             frame[k] = req[i];
+         }
+         display();
+     }
+     for(j=0; j < k; j++)
+     {
+       x = deq();
+       if(x != req[i] && x != lfu)
+       {
+          enq(x);
+       }
+     }
+     enq(req[i]);
+     for(j = 0; j < fn; j++)
+     {
+      ru[frame[j]]++;
+     }
+     ru[req[i]] = 1;
+   }
+   printf("\n\nfaults = %d\thits = %d\n\n", fault, rn-fault);
+}
+
+
+void main()
+{
+   int choice;
+   printf("No of Frames: ");
+   scanf("%d", &fn);
+   printf("No of requests: ");
+   scanf("%d", &rn);
+   printf("Request: ");
+   for(int i = 0; i < rn; i++)
+   {
+      scanf("%d", &req[i]);
+      ru[req[i]] = 0;
+   }
+   for(int i = 0; i < fn; i++)
+   {
+      frame[i] = -1;
+   }
+   printf("\nMENU: \t1. FIFO\n\t2. LRU\n\t3. LFU\nChoice: ");
+   scanf("%d", &choice);
+   switch(choice)
+   {
+      case 1: fifo();
+              break;
+      case 2: lru();
+              break;
+      case 3: lfu();
+              break;
+      default: printf(" NO such choice !\n\n");
+   }
+   printf("\n\n");
+}
