@@ -1,0 +1,72 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<semaphore.h>
+
+#define MAX_BUFFER_SIZE 5
+
+int buffer=0;
+sem_t mutex,full,empty;
+
+void producer()
+{
+    sem_wait(&empty);
+    sem_wait(&mutex);
+    buffer++;
+    printf("Producer produces item %d",buffer);
+    sem_post(&full);
+    sem_post(&mutex);
+}
+
+void consumer()
+{
+    sem_wait(&full);
+    sem_wait(&mutex);
+    buffer++;
+    printf("Consumer consumes item %d",buffer);
+    sem_post(&empty);
+    sem_post(&mutex);
+}
+
+void main()
+{
+    int choice;
+    sem_init(&mutex,0,1);
+    sem_init(&full,0,0);
+    sem_init(&empty,0,MAX_BUFFER_SIZE);
+    while(1)
+    {
+        printf("\n1.Produce\n2.Consume\n3.Exit\n");
+        printf("Enter choice:");
+        scanf("%d",&choice);
+
+        switch(choice)
+        {
+            case 1:
+            if(buffer<MAX_BUFFER_SIZE)
+            {
+                producer();
+            }
+            else
+            {
+                printf("Buffer is full\n");
+            }
+            break;
+            case 2:
+            if(buffer>0)
+            {
+                consumer();
+            }
+            else
+            {
+                printf("Buffer is empty\n");
+            }
+            break;
+            case 3:
+            sem_destroy(&mutex);
+            sem_destroy(&full);
+            sem_destroy(&empty);
+            exit(0);
+        }
+    }
+}
